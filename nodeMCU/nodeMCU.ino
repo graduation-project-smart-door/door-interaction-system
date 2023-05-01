@@ -8,7 +8,6 @@
 
 const char* ssid = "HONOR 70";
 const char* password = "copperTube";
-float pos;
 
 enum DOOR_STATE {
   closed,
@@ -55,6 +54,7 @@ void setup()
   Serial.println("HTTP server started");
 
   if (currentState == closed) {
+    int pos;
     deactivateLock(); 
     delay(500);   
     for (pos = 90; pos <= 170; pos += 1) {
@@ -63,7 +63,7 @@ void setup()
      delay(28);
     }
     delay(2000);
-    for (pos = 170; pos >= 45; pos -= 1) {
+    for (pos = 170; pos >= 40; pos -= 1) {
      servo_1.write(pos);
      Serial.println(pos);
      delay(28);
@@ -108,12 +108,14 @@ void handleDoorStateChange() //обработчик
 }
 
 void handleHealthcheck() //обработчик
-{  
+{
+  
   server.send(200, "text/json", "{Door Opened}");     
 }
 
 void openDoor() {
-  for (pos = 45; pos <= 170; pos += 1) {
+  int pos;
+  for (pos = 40; pos <= 170; pos += 1) {
      servo_1.write(pos);
      Serial.println(pos);
      delay(28);
@@ -121,7 +123,8 @@ void openDoor() {
 }
 
 void closeDoor() {
-  for (pos = 170; pos >= 45; pos -= 1) {
+  int pos;
+  for (pos = 170; pos >= 40; pos -= 1) {
      servo_1.write(pos);
      Serial.println(pos);
      delay(28);
