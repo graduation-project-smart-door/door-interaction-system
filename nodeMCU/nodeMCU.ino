@@ -1,32 +1,33 @@
-#include <ESP8266WiFi.h> 
+#include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#include <Servo.h> 
-#define RELAY_PIN D1  
+#include <Servo.h>
+#define RELAY_PIN D1
 #define LOCK_DELAY 10
 
 
 
 const char* ssid = "HONOR 70";
 const char* password = "copperTube";
+float pos;
 
 enum DOOR_STATE {
   closed,
   closing,
   opening,
-  opened  
+  opened
 };
 
 DOOR_STATE currentState  = closed;
 
-ESP8266WebServer server(80);   
+ESP8266WebServer server(80);
 Servo servo_1;
 
-void setup() 
+void setup()
 {
   Serial.begin(115200);
   delay(100);
   servo_1.attach(4);
-  pinMode(RELAY_PIN, OUTPUT); 
+  pinMode(RELAY_PIN, OUTPUT);
 
   Serial.println("Connecting to ");
   Serial.println(ssid);
@@ -35,7 +36,7 @@ void setup()
   WiFi.begin(ssid, password);
 
   // проверить, подключился ли wi-fi модуль к wi-fi сети
-  while (WiFi.status() != WL_CONNECTED) 
+  while (WiFi.status() != WL_CONNECTED)
   {
     delay(1000);
     Serial.print(".");
@@ -43,27 +44,26 @@ void setup()
 
   Serial.println("");
   Serial.println("WiFi connected..!");
-  Serial.print("Got IP: ");  
+  Serial.print("Got IP: ");
   Serial.println(WiFi.localIP());
 
-  server.on("/door/open", handleDoorStateChange);  
-  server.on("/door/healthcheck", handleHealthcheck);  
+  server.on("/door/open", handleDoorStateChange);
+  server.on("/door/healthcheck", handleHealthcheck);
 
   server.enableCORS(true);
   server.begin();                                // запуск сервера
   Serial.println("HTTP server started");
 
   if (currentState == closed) {
-    int pos;
-    deactivateLock(); 
-    delay(500);   
+    deactivateLock();
+    delay(500);
     for (pos = 90; pos <= 170; pos += 1) {
      servo_1.write(pos);
      Serial.println(pos);
      delay(28);
     }
     delay(2000);
-    for (pos = 170; pos >= 40; pos -= 1) {
+    for (pos = 170; pos >= 45; pos -= 1) {
      servo_1.write(pos);
      Serial.println(pos);
      delay(28);
@@ -73,15 +73,15 @@ void setup()
   }
 }
 
-void loop() 
+void loop()
 {
-  server.handleClient();    // обработка входящих запросов 
+  server.handleClient();    // обработка входящих запросов
 }
 
 void handleDoorStateChange() //обработчик
 {
   if (currentState == closed) {
-    currentState = opening;  
+    currentState = opening;
     deactivateLock();
     delay(300);
     openDoor();
@@ -109,13 +109,11 @@ void handleDoorStateChange() //обработчик
 
 void handleHealthcheck() //обработчик
 {
-  
-  server.send(200, "text/json", "{Door Opened}");     
+  server.send(200, "text/json", "{Door Opened}");
 }
 
 void openDoor() {
-  int pos;
-  for (pos = 40; pos <= 170; pos += 1) {
+  for (pos = 45; pos <= 170; pos += 1) {
      servo_1.write(pos);
      Serial.println(pos);
      delay(28);
@@ -123,8 +121,7 @@ void openDoor() {
 }
 
 void closeDoor() {
-  int pos;
-  for (pos = 170; pos >= 40; pos -= 1) {
+  for (pos = 170; pos >= 45; pos -= 1) {
      servo_1.write(pos);
      Serial.println(pos);
      delay(28);
@@ -136,5 +133,5 @@ void activateLock() {
 }
 
 void deactivateLock() {
-  digitalWrite(RELAY_PIN, LOW); 
+  digitalWrite(RELAY_PIN, LOW);
 }
